@@ -1,0 +1,24 @@
+{
+  "name": "static-site",
+  "version": "1.0.0",
+  "description": "A static site with blog, newsletter integration, and contact form",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "build": "node src/build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "marked": "^15.0.12",
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "express-handlebars": "^8.0.3"
+  }
+}
