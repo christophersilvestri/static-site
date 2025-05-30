@@ -34,10 +34,13 @@ function getBlogPosts() {
         const filePath = path.join(postsDir, filename);
         const fileContent = fs.readFileSync(filePath, 'utf-8');
         const { data, content } = matter(fileContent);
+        // Get first paragraph after title (skip headings and empty lines)
+        const paragraphs = content.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+        const excerpt = paragraphs.find(p => !p.startsWith('#')) || '';
         return {
             ...data,
             slug: data.slug || filename.replace(/\.md$/, ''),
-            excerpt: content.split('\n').slice(2, 6).join(' '),
+            excerpt,
             date: data.date || '',
         };
     });
@@ -53,6 +56,7 @@ app.get('/', (req, res) => {
 
 app.get('/blog', (req, res) => {
     const posts = getBlogPosts().sort((a, b) => new Date(b.date) - new Date(a.date));
+    console.log(posts);
     res.render('blog', {
         title: 'Blog',
         layout: 'main',
