@@ -2,6 +2,9 @@ const express = require('express');
 const path = require('path');
 const exphbs = require('express-handlebars');
 const dotenv = require('dotenv');
+const fs = require('fs');
+const marked = require('marked');
+const matter = require('gray-matter');
 
 // Load environment variables
 dotenv.config();
@@ -23,6 +26,23 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Helper to get all blog posts
+function getBlogPosts() {
+    const postsDir = path.join(__dirname, '../content/blog');
+    const files = fs.readdirSync(postsDir).filter(f => f.endsWith('.md'));
+    return files.map(filename => {
+        const filePath = path.join(postsDir, filename);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const { data, content } = matter(fileContent);
+        return {
+            ...data,
+            slug: data.slug || filename.replace(/\.md$/, ''),
+            excerpt: content.split('\n').slice(2, 6).join(' '),
+            date: data.date || '',
+        };
+    });
+}
+
 // Routes
 app.get('/', (req, res) => {
     res.render('home', {
@@ -32,9 +52,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/blog', (req, res) => {
+    const posts = getBlogPosts().sort((a, b) => new Date(b.date) - new Date(a.date));
     res.render('blog', {
         title: 'Blog',
-        layout: 'main'
+        layout: 'main',
+        posts
     });
 });
 
@@ -42,6 +64,29 @@ app.get('/contact', (req, res) => {
     res.render('contact', {
         title: 'Contact',
         layout: 'main'
+    });
+});
+
+// Individual blog post page
+app.get('/blog/:slug', (req, res) => {
+    const postsDir = path.join(__dirname, '../content/blog');
+    const files = fs.readdirSync(postsDir).filter(f => f.endsWith('.md'));
+    const file = files.find(f => {
+        const fileContent = fs.readFileSync(path.join(postsDir, f), 'utf-8');
+        const { data } = matter(fileContent);
+        return (data.slug || f.replace(/\.md$/, '')) === req.params.slug;
+    });
+    if (!file) {
+        return res.status(404).send('Post not found');
+    }
+    const fileContent = fs.readFileSync(path.join(postsDir, file), 'utf-8');
+    const { data, content } = matter(fileContent);
+    const html = marked.parse(content);
+    res.render('post', {
+        title: data.title,
+        layout: 'main',
+        content: html,
+        date: data.date
     });
 });
 

@@ -3,11 +3,14 @@
         <h1>Blog</h1>
         <p>Welcome to the blog! Here you'll find our latest posts.</p>
         <div class="blog-list">
-            <!-- Blog posts will be listed here -->
-            <div class="blog-post-placeholder">
-                <h2>Coming Soon</h2>
-                <p>Blog posts written in Markdown will appear here.</p>
+            {{#each posts}}
+            <div class="blog-post-preview">
+                <h2><a href="/blog/{{slug}}">{{title}}</a></h2>
+                <p class="blog-date">{{date}}</p>
+                <p>{{excerpt}}</p>
+                <a href="/blog/{{slug}}" class="btn btn-text">Read More →</a>
             </div>
+            {{/each}}
         </div>
     </div>
 </section> 
