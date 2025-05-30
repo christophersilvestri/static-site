@@ -94,6 +94,21 @@ app.get('/blog/:slug', (req, res) => {
     });
 });
 
+app.get('/about', (req, res) => {
+    const aboutPath = path.join(__dirname, '../content/pages/about.md');
+    if (!fs.existsSync(aboutPath)) {
+        return res.status(404).send('About page not found');
+    }
+    const fileContent = fs.readFileSync(aboutPath, 'utf-8');
+    const { data, content } = matter(fileContent);
+    const html = marked.parse(content);
+    res.render('page', {
+        title: data.title || 'About',
+        layout: 'main',
+        content: html
+    });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
